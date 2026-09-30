@@ -33,7 +33,7 @@ Make what exists nicer and easier. No new journal features (no mood, templates, 
 
 Admin actions refuse anyone who isn't an admin; a password reset signs that account out.
 
-## 0.2.2 — Open to everyone (dev)
+## 0.2.2 — Open to everyone (shipped)
 
 Published images and the hardening a public release needs.
 
