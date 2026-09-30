@@ -1,4 +1,6 @@
 # Weekly update PRs into dev, grouped so each ecosystem is one PR at a time.
+# Major versions are never proposed: those are planned upgrades (see
+# docs/ROADMAP.md), not routine bumps. Security alerts still cover them.
 version: 2
 updates:
   - package-ecosystem: npm
@@ -9,6 +11,9 @@ updates:
     groups:
       npm:
         update-types: [minor, patch]
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
 
   - package-ecosystem: github-actions
     directory: /

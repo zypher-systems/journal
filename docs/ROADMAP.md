@@ -43,6 +43,10 @@ Published images and the hardening a public release needs.
 - Escaped search snippets, framing and sniffing headers, CSRF trusts only `ORIGIN`
 - Required database password, dev database bound to localhost
 
+## 0.2.3 — Quieter upkeep (shipped)
+
+Routine dependency updates; Dependabot proposes only grouped minor and patch updates.
+
 ## 0.3.0 — Find your days
 
 Month calendar grid, richer discovery of past writing.
