@@ -1,0 +1,9 @@
+node_modules
+.svelte-kit
+build
+.git
+data
+*.sql.gz
+.env
+.env.*
+!.env.example

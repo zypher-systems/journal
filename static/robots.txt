@@ -1,0 +1,3 @@
+# A private journal: nothing here for search engines.
+User-agent: *
+Disallow: /

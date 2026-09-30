@@ -1,0 +1,386 @@
+/* Fonts are imported in src/routes/+layout.svelte (bundled & self-hosted by Vite). */
+
+/* ── Tailwind ─────────────────────────────────────────────── */
+
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Design tokens. Light = warm paper; Dark = warm candlelight.  */
+@theme inline {
+	--color-paper: var(--paper);
+	--color-raised: var(--raised);
+	--color-sunken: var(--sunken);
+	--color-ink: var(--ink);
+	--color-ink-soft: var(--ink-soft);
+	--color-ink-mute: var(--ink-mute);
+	--color-line: var(--line);
+	--color-line-soft: var(--line-soft);
+	--color-sage: var(--sage);
+	--color-sage-deep: var(--sage-deep);
+	--color-sage-mist: var(--sage-mist);
+	--color-clay: var(--clay);
+
+	--font-serif: 'Newsreader Variable', 'Iowan Old Style', Georgia, serif;
+	--font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+	--font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+
+	--radius-soft: 0.625rem;
+	--radius-card: 1.125rem;
+
+	--ease-soothe: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:root {
+	--paper: #faf6ee;
+	--raised: #fffdf6;
+	--sunken: #f2ecdf;
+	--ink: #292420;
+	--ink-soft: #4c433a;
+	--ink-mute: #8b7f70;
+	--line: #e4dccb;
+	--line-soft: #ede5d6;
+	--sage: #66866e;
+	--sage-deep: #4f6a58;
+	--sage-mist: #e2e9e0;
+	--clay: #a86a58;
+
+	--grain-opacity: 0.045;
+	--glow: rgba(102, 134, 110, 0.12);
+	--wash-top: color-mix(in oklab, var(--sage) 9%, transparent);
+	--wash-bottom: color-mix(in oklab, #c4a07a 7%, transparent);
+	color-scheme: light;
+}
+
+.dark {
+	--paper: #1b1815;
+	--raised: #241f1a;
+	--sunken: #141210;
+	--ink: #e9e1d3;
+	--ink-soft: #c8bcaa;
+	--ink-mute: #86796a;
+	--line: #373029;
+	--line-soft: #2a2521;
+	--sage: #93b099;
+	--sage-deep: #a7c2ac;
+	--sage-mist: #27302a;
+	--clay: #cf9180;
+
+	--grain-opacity: 0.065;
+	--glow: rgba(147, 176, 153, 0.09);
+	--wash-top: rgba(210, 168, 96, 0.09);
+	--wash-bottom: rgba(147, 176, 153, 0.06);
+	color-scheme: dark;
+}
+
+/* ── Base ─────────────────────────────────────────────────── */
+
+html {
+	font-family: var(--font-sans);
+	background: var(--paper);
+}
+
+body {
+	@apply bg-paper text-ink antialiased;
+	min-height: 100dvh;
+}
+
+::selection {
+	background: var(--sage-mist);
+	color: var(--ink);
+}
+
+/* Warm focus rings, everywhere */
+:focus-visible {
+	outline: 2px solid var(--sage);
+	outline-offset: 2px;
+	border-radius: 4px;
+}
+
+/* ── Texture & depth ─────────────────────────────────────── */
+
+/* Cream/sage wash under the grain — paper you can feel */
+.wash {
+	background: var(--paper);
+}
+.wash::after {
+	content: '';
+	position: fixed;
+	inset: 0;
+	z-index: 0;
+	pointer-events: none;
+	background:
+		radial-gradient(80rem 48rem at 50% -8%, var(--wash-top), transparent 58%),
+		radial-gradient(56rem 36rem at 82% 112%, var(--wash-bottom), transparent 52%);
+}
+
+/* Paper grain: inline SVG turbulence, zero assets, both themes */
+.grain::before {
+	content: '';
+	position: fixed;
+	inset: 0;
+	z-index: 9999;
+	pointer-events: none;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+	opacity: var(--grain-opacity);
+}
+
+/* Footer clearance. The compose bar is fixed at bottom-6 (1.5rem) and is
+   about 2.875rem tall. Padding keeps the tagline above it at rest;
+   layout.svelte shifts the footer if a short page still slides it into the bar.
+   Keep this sum in step with the clearance in +layout.svelte. */
+.page-footer {
+	padding-bottom: 2.5rem;
+}
+.page-footer.is-composing {
+	padding-bottom: calc(1.5rem + 2.875rem + 1.35rem);
+	pointer-events: none;
+}
+
+/* Ornamental rule: hairline + centered dots */
+.rule {
+	display: flex;
+	align-items: center;
+	gap: 0.85rem;
+	color: var(--sage);
+	opacity: 0.55;
+	font-family: var(--font-serif);
+	font-size: 0.8rem;
+	letter-spacing: 0.55em;
+	user-select: none;
+}
+.rule::before,
+.rule::after {
+	content: '';
+	flex: 1;
+	height: 1px;
+	background: color-mix(in oklab, var(--sage) 28%, var(--line));
+}
+
+/* Entry card as a leaf of paper */
+.entry-leaf {
+	background:
+		linear-gradient(
+			180deg,
+			color-mix(in oklab, var(--raised) 88%, var(--sunken)) 0%,
+			var(--raised) 42%
+		);
+	border-left: 2px solid color-mix(in oklab, var(--sage) 42%, var(--sage-mist));
+	box-shadow:
+		inset 0 1px 0 color-mix(in oklab, #fff 28%, transparent),
+		0 1px 2px rgba(58, 47, 36, 0.05),
+		0 6px 24px -8px rgba(58, 47, 36, 0.1);
+}
+.dark .entry-leaf {
+	box-shadow:
+		inset 0 1px 0 color-mix(in oklab, #fff 4%, transparent),
+		0 1px 2px rgba(0, 0, 0, 0.25),
+		0 6px 24px -8px rgba(0, 0, 0, 0.4);
+}
+
+/* Frosted glass panel */
+.glass {
+	background: color-mix(in oklab, var(--raised) 72%, transparent);
+	backdrop-filter: blur(14px) saturate(1.15);
+	-webkit-backdrop-filter: blur(14px) saturate(1.15);
+	border: 1px solid color-mix(in oklab, var(--line) 55%, transparent);
+}
+
+/* Sage halo behind the writing surface */
+.glow {
+	position: relative;
+}
+.glow::after {
+	content: '';
+	position: absolute;
+	inset: -6rem -4rem;
+	z-index: -1;
+	background:
+		radial-gradient(38rem 22rem at 50% 8%, var(--glow), transparent 70%);
+	pointer-events: none;
+}
+
+/* Soft layered card shadow */
+.shadow-soft {
+	box-shadow:
+		0 1px 2px rgba(58, 47, 36, 0.05),
+		0 6px 24px -8px rgba(58, 47, 36, 0.1);
+}
+.dark .shadow-soft {
+	box-shadow:
+		0 1px 2px rgba(0, 0, 0, 0.25),
+		0 6px 24px -8px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Entry typography (reading + editor) ──────────────────── */
+
+.prose-entry {
+	font-family: var(--font-serif);
+	font-size: 1.1875rem;
+	line-height: 1.78;
+	letter-spacing: 0.006em;
+	color: var(--ink-soft);
+	max-width: 66ch;
+}
+
+.prose-entry h1,
+.prose-entry h2,
+.prose-entry h3 {
+	font-family: var(--font-serif);
+	font-variation-settings: 'opsz' 60;
+	color: var(--ink);
+	font-weight: 550;
+	letter-spacing: -0.01em;
+	margin: 2rem 0 0.75rem;
+	line-height: 1.25;
+}
+.prose-entry h1 { font-size: 1.8em; margin-top: 0.5rem; }
+.prose-entry h2 { font-size: 1.45em; }
+.prose-entry h3 { font-size: 1.2em; }
+
+.prose-entry p { margin: 0 0 1.15em; }
+
+/* Modest drop cap on a read page — only when the first node is a paragraph */
+.prose-entry.is-reading > p:first-child::first-letter {
+	float: left;
+	font-family: var(--font-serif);
+	font-variation-settings: 'opsz' 72;
+	font-size: 3.05em;
+	line-height: 0.82;
+	padding: 0.1em 0.14em 0 0;
+	color: var(--sage-deep);
+	font-weight: 500;
+}
+
+.prose-entry blockquote {
+	margin: 1.6em 0;
+	padding: 0.2em 0 0.2em 1.25em;
+	border-left: 2px solid var(--sage);
+	font-style: italic;
+	color: var(--ink-soft);
+}
+
+.prose-entry hr {
+	border: none;
+	margin: 2.4em auto;
+	width: 100%;
+	text-align: center;
+}
+.prose-entry hr::after {
+	content: '···';
+	display: inline-block;
+	letter-spacing: 0.6em;
+	margin-left: 0.6em;
+	color: var(--ink-mute);
+	font-size: 1.1em;
+}
+
+.prose-entry ul,
+.prose-entry ol {
+	margin: 0 0 1.15em;
+	padding-left: 1.5em;
+}
+.prose-entry li { margin: 0.3em 0; }
+.prose-entry ul li::marker { color: var(--sage); }
+.prose-entry ol li::marker { color: var(--sage); font-variant-numeric: tabular-nums; }
+
+.prose-entry a {
+	color: var(--sage-deep);
+	text-decoration: underline;
+	text-decoration-color: color-mix(in oklab, var(--sage) 45%, transparent);
+	text-underline-offset: 3px;
+	transition: text-decoration-color 0.25s var(--ease-soothe);
+}
+.prose-entry a:hover { text-decoration-color: var(--sage-deep); }
+
+.prose-entry code {
+	font-family: var(--font-mono);
+	font-size: 0.82em;
+	background: var(--sage-mist);
+	padding: 0.15em 0.4em;
+	border-radius: 6px;
+	color: var(--ink);
+}
+.prose-entry pre {
+	font-family: var(--font-mono);
+	font-size: 0.85rem;
+	background: var(--sunken);
+	border: 1px solid var(--line-soft);
+	border-radius: var(--radius-soft);
+	padding: 1em 1.25em;
+	overflow-x: auto;
+	line-height: 1.6;
+	margin: 0 0 1.15em;
+}
+.prose-entry pre code { background: none; padding: 0; }
+
+.prose-entry img {
+	max-width: 100%;
+	height: auto;
+	border-radius: var(--radius-soft);
+	margin: 1.5em 0;
+	box-shadow:
+		0 1px 2px rgba(58, 47, 36, 0.08),
+		0 10px 32px -10px rgba(58, 47, 36, 0.22);
+}
+
+/* ── ProseMirror editor ───────────────────────────────────── */
+
+.ProseMirror {
+	outline: none;
+	min-height: 50vh;
+	background-image: repeating-linear-gradient(
+		to bottom,
+		transparent 0,
+		transparent calc(1.78em - 1px),
+		color-mix(in oklab, var(--line-soft) 65%, transparent) calc(1.78em - 1px),
+		color-mix(in oklab, var(--line-soft) 65%, transparent) 1.78em
+	);
+	background-attachment: local;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+	content: attr(data-placeholder);
+	color: var(--ink-mute);
+	opacity: 0.7;
+	font-style: italic;
+	float: left;
+	height: 0;
+	pointer-events: none;
+}
+
+.ProseMirror img {
+	cursor: default;
+}
+.ProseMirror img.ProseMirror-selectednode {
+	outline: 2px solid var(--sage);
+	outline-offset: 3px;
+	border-radius: var(--radius-soft);
+}
+
+/* Search snippets from Postgres ts_headline */
+mark,
+.search-snippet mark {
+	background: color-mix(in oklab, var(--sage) 32%, transparent);
+	color: inherit;
+	padding: 0 0.12em;
+	border-radius: 3px;
+}
+
+/* ── Little niceties ──────────────────────────────────────── */
+
+.tabular { font-variant-numeric: tabular-nums; }
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		transition-duration: 0.01ms !important;
+	}
+	::view-transition-group(*),
+	::view-transition-old(*),
+	::view-transition-new(*) {
+		animation: none !important;
+	}
+}

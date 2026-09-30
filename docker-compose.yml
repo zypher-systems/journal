@@ -1,0 +1,79 @@
+# journal — production stack
+# Runs the published image from GitHub Container Registry.
+#
+#   cp .env.example .env   # then edit
+#   docker compose up -d
+#
+# Upgrade:          docker compose pull && docker compose up -d
+# Build from source: docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build
+
+services:
+  app:
+    image: ${JOURNAL_IMAGE:-ghcr.io/zypher-systems/journal:latest}
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://journal:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/journal
+      # MUST match the address users type in the browser, e.g. http://192.168.1.20:3000
+      ORIGIN: ${ORIGIN:-http://localhost:3000}
+      UPLOADS_DIR: /data/uploads
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      # First-boot admin (only used while no users exist)
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_NAME: ${ADMIN_NAME:-Admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      # Behind a reverse proxy: read the visitor's address from its header
+      ADDRESS_HEADER: ${ADDRESS_HEADER:-}
+      XFF_DEPTH: ${XFF_DEPTH:-1}
+    ports:
+      - '${JOURNAL_PORT:-3000}:3000'
+    volumes:
+      - uploads:/data/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: journal
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: journal
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U journal -d journal']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # Nightly pg_dump (version-matched to the db), kept for two weeks on the `backups` volume.
+  backup:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - backups:/backups
+    depends_on:
+      db:
+        condition: service_healthy
+    entrypoint: ['sh', '-c']
+    command:
+      - |
+        while true; do
+          now=$$(date +%s)
+          next=$$(((now / 86400 + 1) * 86400 + 60))
+          echo "next backup at $$(date -d @$$next -u '+%Y-%m-%d %H:%M UTC')"
+          sleep $$((next - now))
+          ts=$$(date +%Y%m%d-%H%M%S)
+          pg_dump -h db -U journal -d journal | gzip > /backups/journal-$$ts.sql.gz \
+            && echo "backup ok: journal-$$ts.sql.gz" \
+            || echo "backup FAILED at $$ts"
+          find /backups -name '*.sql.gz' -mtime +14 -delete
+        done
+
+volumes:
+  pgdata:
+  uploads:
+  backups:
