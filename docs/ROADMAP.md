@@ -47,6 +47,10 @@ Published images and the hardening a public release needs.
 
 Routine dependency updates; Dependabot proposes only grouped minor and patch updates.
 
+## 0.2.4 — Less machinery (shipped)
+
+No Dependabot update pull requests, no CI on `main`, and a release promotes the tested image instead of rebuilding it.
+
 ## 0.3.0 — Find your days
 
 Month calendar grid, richer discovery of past writing.
